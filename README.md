@@ -14,11 +14,11 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 <!--- benchmarking table --->
 ## Benchmarks
 
-|  Day  | Part 1 | Part 2 |
-| :---: | :----: | :----: |
+| Day | Part 1 | Part 2 |
+| :---: | :---: | :---:  |
+| [Day 1](./src/bin/01.rs) | `36.5µs` | `48.1µs` |
 
-
-**Total: 0ms**
+**Total: 0.08ms**
 <!--- benchmarking table --->
 
 ---

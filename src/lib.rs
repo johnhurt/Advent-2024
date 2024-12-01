@@ -13,8 +13,7 @@ use nom::{
     sequence::{delimited, preceded},
     Parser,
 };
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
+use strum::{EnumIter, IntoEnumIterator};
 use tinyvec::TinyVec;
 
 pub type TV4<K> = TinyVec<[K; 4]>;
@@ -185,9 +184,8 @@ impl<T> Grid<T> {
     }
 
     pub fn escaping(&self, i: usize) -> impl Iterator<Item = Compass> + '_ {
-        Compass::iter().filter_map(move |dir| {
-            self.step_from_index(i, dir).is_none().then_some(dir)
-        })
+        Compass::iter()
+            .filter(move |dir| self.step_from_index(i, *dir).is_some())
     }
 
     pub fn min_dist(&self, from: usize, to: usize) -> usize {
