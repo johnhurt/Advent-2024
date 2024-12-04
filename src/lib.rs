@@ -60,6 +60,30 @@ pub enum Compass {
     W,
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
+pub enum FullCompass {
+    #[default]
+    N,
+    NE,
+    E,
+    SE,
+    S,
+    SW,
+    W,
+    NW,
+}
+
+impl From<Compass> for FullCompass {
+    fn from(value: Compass) -> Self {
+        match value {
+            Compass::N => FullCompass::N,
+            Compass::E => FullCompass::E,
+            Compass::S => FullCompass::S,
+            Compass::W => FullCompass::W,
+        }
+    }
+}
+
 impl Compass {
     pub fn from_relative(relative: char) -> Option<Self> {
         match relative {
@@ -163,15 +187,30 @@ impl<T> Grid<T> {
     }
 
     #[allow(clippy::unnecessary_lazy_evaluations)]
-    pub fn step_from_index(&self, i: usize, dir: Compass) -> Option<usize> {
-        use Compass as D;
+    pub fn step_from_index<D>(&self, i: usize, dir: D) -> Option<usize>
+    where
+        FullCompass: From<D>,
+    {
+        use FullCompass as D;
 
-        match dir {
-            D::E => (i % self.width < (self.width - 1)).then_some(i + 1),
-            D::W => (i % self.width > 0).then(|| i - 1),
-            D::N => i.checked_sub(self.width),
-            D::S => Some(i + self.width).filter(|j| *j < self.data.len()),
-        }
+        let (col, row) = self.to_col_row(i);
+        let max_row = self.height - 1;
+        let max_col = self.width - 1;
+
+        let res_col_row = match FullCompass::from(dir) {
+            D::N => (row > 0).then(|| (col, row - 1)),
+            D::NE => (row > 0 && col < max_col).then(|| (col + 1, row - 1)),
+            D::E => (col < max_col).then(|| (col + 1, row)),
+            D::SE => {
+                (row < max_row && col < max_col).then(|| (col + 1, row + 1))
+            }
+            D::S => (row < max_row).then(|| (col, row + 1)),
+            D::SW => (row < max_row && col > 0).then(|| (col - 1, row + 1)),
+            D::W => (col > 0).then(|| (col - 1, row)),
+            D::NW => (row > 0 && col > 0).then(|| (col - 1, row - 1)),
+        };
+
+        res_col_row.map(|(col, row)| self.to_index(col, row))
     }
 
     pub fn neighbors(
@@ -226,12 +265,39 @@ impl<T> Grid<T> {
         .into_iter()
     }
 
-    pub fn to_col_row(&self, i: usize) -> (i32, i32) {
-        ((i % self.width) as i32, (i / self.width) as i32)
+    pub fn to_col_row(&self, i: usize) -> (usize, usize) {
+        (i % self.width, i / self.width)
     }
 
-    pub fn to_index(&self, col: i32, row: i32) -> usize {
-        col as usize + row as usize * self.width
+    pub fn to_index(&self, col: usize, row: usize) -> usize {
+        col + row * self.width
+    }
+
+    pub fn ray(&self, index: usize, dir: FullCompass) -> RayIter<'_, T> {
+        RayIter {
+            grid: self,
+            dir,
+            curr: Some(index),
+        }
+    }
+}
+
+pub struct RayIter<'a, T> {
+    grid: &'a Grid<T>,
+    dir: FullCompass,
+    curr: Option<usize>,
+}
+
+impl<'a, T> Iterator for RayIter<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        let result = self.curr;
+
+        let curr = result?;
+
+        self.curr = self.grid.step_from_index(curr, self.dir);
+
+        result.map(|i| &self.grid.data[i])
     }
 }
 
