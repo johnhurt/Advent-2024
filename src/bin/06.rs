@@ -36,21 +36,30 @@ pub fn part_one(input: &str) -> Option<usize> {
     Some(get_seen_positions(start, &grid).len())
 }
 
-fn has_cycle(start: usize, grid: &Grid<char>) -> bool {
+fn has_cycle(
+    start: usize,
+    grid: &Grid<char>,
+    working_space: &mut [[u16; 4]],
+    generation: u16,
+) -> bool {
     let mut d = Compass::N;
     let mut p = start;
 
-    let mut seen = HashSet::new();
-    seen.insert((p, d));
+    working_space[p][d as u8 as usize] = generation;
 
     while let Some(next) = grid.step_from_index(p, d) {
         if grid.data[next] == '#' {
             d = d.turn_right();
         } else {
             p = next;
-            if !seen.insert((p, d)) {
+
+            let cell = &mut working_space[p][d as u8 as usize];
+
+            if *cell == generation {
                 return true;
             }
+
+            *cell = generation;
         }
     }
 
@@ -68,12 +77,25 @@ pub fn part_two(input: &str) -> Option<usize> {
 
     let possible_positions = get_seen_positions(start, &grid);
 
+    // Originally I detected cycles with a hashmap, but that was very slow.
+    // This method uses a fixed (but large) amount of memory for all checks of
+    // cycles. We duplicate the shape of the grid with a slot for each direction
+    // the guard could be facing there.
+    //
+    // For each possible position of the new obstacle, we set a new "generation"
+    // and use that as the marker for position-direction pairs, if a traversal
+    // of the new grid encounters a slot with the current generation, it
+    // indicates a repeated vector and a cycle
+    let mut cycle_detector = vec![[0; 4]; grid.data.len()];
+
     let result = possible_positions
         .into_iter()
-        .filter(|ob| {
+        .enumerate()
+        .filter(|(i, ob)| {
             grid.data[*ob] = '#';
 
-            let result = has_cycle(start, &grid);
+            let result =
+                has_cycle(start, &grid, &mut cycle_detector, *i as u16 + 1);
 
             grid.data[*ob] = '.';
 

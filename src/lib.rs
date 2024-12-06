@@ -52,6 +52,7 @@ where
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
+#[repr(u8)]
 pub enum Compass {
     #[default]
     N,
