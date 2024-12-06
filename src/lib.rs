@@ -105,6 +105,16 @@ impl Compass {
             D::S => D::N,
         }
     }
+
+    pub fn turn_right(&self) -> Self {
+        use Compass as D;
+        match self {
+            D::E => D::S,
+            D::N => D::E,
+            D::W => D::N,
+            D::S => D::W,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
