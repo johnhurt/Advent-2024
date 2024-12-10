@@ -194,7 +194,6 @@ pub fn part_two(input: &str) -> Option<usize> {
     let moveable = (0..list.nodes.len()).rev().filter(|i| i % 2 == 0);
 
     for to_move in moveable {
-        list.check_sum();
         let node = &list.nodes[to_move];
         if let Some(target) = list.find_first_slot(node.len, to_move) {
             list.move_chunk(to_move, target);
