@@ -291,6 +291,25 @@ impl<T> Grid<T> {
             curr: Some(index),
         }
     }
+
+    pub fn map<F, U>(self, f: F) -> Grid<U>
+    where
+        F: FnMut(T) -> U,
+    {
+        let Grid {
+            data,
+            height,
+            width,
+        } = self;
+
+        let data = data.into_iter().map(f).collect_vec();
+
+        Grid {
+            data,
+            width,
+            height,
+        }
+    }
 }
 
 pub struct RayIter<'a, T> {
