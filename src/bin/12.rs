@@ -235,6 +235,6 @@ mod tests {
     #[test]
     fn test_corner() {
         let r = part_two("BAA\nABA\nAAA").unwrap();
-        assert_eq!(r, 1 + 4 + 4 + 7* (10))
+        assert_eq!(r, 4 + 4 + 7 * (10))
     }
 }
