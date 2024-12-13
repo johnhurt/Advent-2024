@@ -229,6 +229,12 @@ mod tests {
     fn test_part_two() {
         let result =
             part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, Some(1206 - 224 + 13 * 20 + 4));
+        assert_eq!(result, Some(1206));
+    }
+
+    #[test]
+    fn test_corner() {
+        let r = part_two("BAA\nABA\nAAA").unwrap();
+        assert_eq!(r, 1 + 4 + 4 + 7* (10))
     }
 }
