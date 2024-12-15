@@ -13,7 +13,7 @@ use nom::{
     sequence::{delimited, preceded},
     Parser,
 };
-use strum::{EnumIter, IntoEnumIterator};
+use strum::{Display, EnumIter, IntoEnumIterator};
 use tinyvec::TinyVec;
 
 pub type TV4<K> = TinyVec<[K; 4]>;
@@ -51,7 +51,9 @@ where
     (max_start < min_end).then(|| max_start..min_end)
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter, Display,
+)]
 #[repr(u8)]
 pub enum Compass {
     #[default]
@@ -61,7 +63,9 @@ pub enum Compass {
     W,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Hash, EnumIter, Display,
+)]
 pub enum FullCompass {
     #[default]
     N,
@@ -329,7 +333,7 @@ pub struct RayIter<'a, T> {
 }
 
 impl<'a, T> Iterator for RayIter<'a, T> {
-    type Item = &'a T;
+    type Item = (usize, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
         let result = self.curr;
 
@@ -337,7 +341,7 @@ impl<'a, T> Iterator for RayIter<'a, T> {
 
         self.curr = self.grid.step_from_index(curr, self.dir);
 
-        result.map(|i| &self.grid.data[i])
+        result.map(|i| (i, &self.grid.data[i]))
     }
 }
 

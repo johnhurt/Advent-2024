@@ -23,7 +23,7 @@ pub fn part_one(input: &str) -> Option<usize> {
     let result = (0..grid.data.len())
         .cartesian_product(FullCompass::iter())
         .map(|(start, dir)| grid.ray(start, dir))
-        .map(|ray| iter_eq(ray.copied(), "XMAS"))
+        .map(|ray| iter_eq(ray.map(|(_, c)| *c), "XMAS"))
         .filter(|v| *v)
         .count();
 
@@ -41,7 +41,9 @@ pub fn part_two(input: &str) -> Option<usize> {
     (0..grid.data.len())
         .cartesian_product([D::NE, D::NW, D::SE, D::SW])
         .map(|(start, dir)| (start, dir, grid.ray(start, dir)))
-        .map(|(start, dir, ray)| (start, dir, iter_eq(ray.copied(), "MAS")))
+        .map(|(start, dir, ray)| {
+            (start, dir, iter_eq(ray.map(|(_, c)| *c), "MAS"))
+        })
         .filter(|(_, _, keep)| *keep)
         .map(|(start, dir, _)| {
             (
