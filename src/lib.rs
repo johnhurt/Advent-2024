@@ -130,6 +130,16 @@ impl Compass {
             D::S => D::E,
         }
     }
+
+    pub fn to_arrow(&self) -> u8 {
+        use Compass as D;
+        match self {
+            D::E => b'>',
+            D::N => b'^',
+            D::W => b'<',
+            D::S => b'v',
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
